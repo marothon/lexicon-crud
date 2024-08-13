@@ -1,0 +1,20 @@
+body {
+    background-color: rgb(70, 70, 70);
+    color: white;
+}
+
+a {
+    text-decoration: none;
+    color: white;
+}
+
+.card-search-result-container{
+    display: flex;
+    flex-wrap: wrap;
+    .card{
+        padding: 1rem;
+        img{
+            border-radius: 1rem;
+        }
+    }
+}

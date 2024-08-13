@@ -7,8 +7,7 @@ class Card {
 
     static async find(name='', page=1){
         if(CardSearch.has(name, page)){
-            console.log('cache');
-            return CardSearch.get('', 1).cards;
+            return CardSearch.get(name, page).cards;
         }
         try {
             let params = name == '' ? '' : `?name=${name}`;
@@ -16,7 +15,8 @@ class Card {
             let cards = await cardsResponse.json();
             console.log(cards);
             let pages = Math.ceil(parseInt(cardsResponse.headers.get('Total-Count'))/100);
-            CardSearch.add(name, cards.cards, 1, pages);
+            CardSearch.add(name, cards.cards, page, pages);
+            console.log(`Remaining calls: ${cardsResponse.headers.get('Ratelimit-Remaining')}`)
             return cards.cards;
         } catch(error){
             console.error(`Unable to fetch card-data: ${error.message}`);
