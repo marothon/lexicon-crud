@@ -23,12 +23,20 @@ header {
         > .filter-settings{
             > .mana-filter {
                 display: flex;
+                padding: 1rem;
+                box-sizing: border-box;
 
                 > .mana {
-                    opacity: 0.5;
+                    opacity: 0.2;
+                    margin: 0.5rem;
+                    cursor: pointer;
 
                     &:hover {
                         opacity: 0.8;
+                    }
+
+                    &.active {
+                        opacity: 1;
                     }
                 }
             }
@@ -44,6 +52,10 @@ header {
             color: black;
         }
     }
+}
+
+.hidden {
+    display: none;
 }
 
 .mana {
