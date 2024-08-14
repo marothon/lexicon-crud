@@ -5,17 +5,20 @@ class Card {
         return Card.find();
     }
 
-    static async find(name='', page=1){
-        if(CardSearch.has(name, page)){
-            return CardSearch.get(name, page).cards;
+    static async find(name='', text='', page=1){
+        name = name.toLocaleLowerCase();
+        text = text.toLocaleLowerCase();
+        if(CardSearch.has(name, text, page)){
+            return CardSearch.get(name, text, page).cards;
         }
         try {
-            let params = name == '' ? '' : `?name=${name}`;
+            let params = '?contains=imageUrl';
+            params = name == '' ? params : `${params}&name=${name}`;
+            params = text == '' ? params : `${params}&text=${text}`;
             let cardsResponse = await fetch(`${this.#baseUrl}/cards${params}`);
             let cards = await cardsResponse.json();
-            console.log(cards);
             let pages = Math.ceil(parseInt(cardsResponse.headers.get('Total-Count'))/100);
-            CardSearch.add(name, cards.cards, page, pages);
+            CardSearch.add(name, text, cards.cards ?? [], page, pages);
             console.log(`Remaining calls: ${cardsResponse.headers.get('Ratelimit-Remaining')}`)
             return cards.cards;
         } catch(error){
@@ -32,8 +35,12 @@ class CardSearch {
         CardSearch.#cache = CardSearch.#cache ?? new Map(JSON.parse(localStorage.getItem('cardSearchCache'))) ?? new Map();
     }
 
-    static add(searchedName, cards, page=1, pages=1){
-        let key = `name:${searchedName},p:${page}`;
+    static #genKey(searchedName, text, page){
+        return `name:${searchedName},text:${text},p:${page}`;
+    }
+
+    static add(searchedName, text, cards, page=1, pages=1){
+        let key = CardSearch.#genKey(searchedName, text, page);
 
         CardSearch.#initCache();
         if(!CardSearch.#cache.has(key)){
@@ -43,13 +50,15 @@ class CardSearch {
         }
     }
 
-    static has(searchedName, page=1){
+    static has(searchedName, text, page=1){
         CardSearch.#initCache();
-        return CardSearch.#cache.has(`name:${searchedName},p:${page}`);
+        let key = CardSearch.#genKey(searchedName, text, page);
+        return CardSearch.#cache.has(key);
     }
 
-    static get(searchedName, page=1){
+    static get(searchedName, text, page=1){
         CardSearch.#initCache();
-        return CardSearch.#cache.get(`name:${searchedName},p:${page}`);
+        let key = CardSearch.#genKey(searchedName, text, page);
+        return CardSearch.#cache.get(key);
     }
 }
