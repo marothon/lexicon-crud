@@ -19,6 +19,20 @@ header {
             padding-left: 1rem;
             font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
         }
+
+        > .filter-settings{
+            > .mana-filter {
+                display: flex;
+
+                > .mana {
+                    opacity: 0.5;
+
+                    &:hover {
+                        opacity: 0.8;
+                    }
+                }
+            }
+        }
     }
 
     nav {
@@ -30,4 +44,36 @@ header {
             color: black;
         }
     }
+}
+
+.mana {
+    background-image: url("../assets/mana.svg");
+    background-repeat: no-repeat;
+    background-size: auto 730%;
+    width: 2.5rem;
+    height: 2.5rem;
+
+    border-radius: 50%;
+    box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.5);
+
+    &.white{
+        background-position: 44.4% 33.3%;
+    }
+
+    &.blue{
+        background-position: 55.45% 33.3%;
+    }
+
+    &.black{
+        background-position: 66.63% 33.3%;
+    }
+
+    &.red{
+        background-position: 77.8% 33.3%;
+    }
+
+    &.green{
+        background-position: 88.9% 33.3%;
+    }
+
 }
