@@ -21,7 +21,6 @@ function setup(){
 function renderCard(card){
     return `
         <article class="card">
-            <h3>${card.name}</h3>
             <img src="${card.imageUrl}">
         </article>
     `;
