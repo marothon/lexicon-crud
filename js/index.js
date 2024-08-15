@@ -10,6 +10,12 @@ function setup(){
             let deck = Deck.load(urlParams.get('deck'));
             updateCurrentDeck(deck);
             renderDeck(deck);
+        }else {
+            let deck = currentDeck();
+            if(deck){
+                renderDeck(deck);
+                window.history.pushState({}, null, `index.html?deck=${deck.name}`);
+            }
         }
         
         document.querySelector('.toggle-filter-settings').addEventListener('click', () => {
@@ -62,11 +68,19 @@ function renderCards(cards){
 
 function currentDeck(){
     let deck = JSON.parse(localStorage.getItem('currentDeck'));
-    return new Deck(deck.name, deck.cards, true);
+    if(deck){
+        return new Deck(deck.name, deck.cards, true);
+    } else {
+        return null;
+    }
 }
 
 function updateCurrentDeck(deck){
     localStorage.setItem('currentDeck', JSON.stringify(deck));
+}
+
+function clearCurrentDeck(){
+    localStorage.removeItem('currentDeck');
 }
 
 function renderDeck(deck){
@@ -74,9 +88,17 @@ function renderDeck(deck){
     deckContainerTag.innerHTML = '';
     let deckTag = `
         <article class="deck">
+            <aside class="close-current-deck">X</aside>
             <h2>${deck.name}</h2>
             <p class="card-count">${deck.cards.length} cards</p>
         </article>
         `;
     deckContainerTag.insertAdjacentHTML('afterbegin', deckTag);
+    deckContainerTag
+    .querySelector('.close-current-deck')
+    .addEventListener('click', (event) => {
+        clearCurrentDeck();
+        event.target.parentElement.remove();
+        window.history.pushState({}, null, 'index.html');
+});
 }
