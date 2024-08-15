@@ -1,3 +1,31 @@
+header {
+    form {
+        > .filter-settings{
+            > .mana-filter {
+                display: flex;
+                padding: 1rem;
+                box-sizing: border-box;
+
+                > .mana {
+                    opacity: 0.2;
+                    margin: 0.5rem;
+                    cursor: pointer;
+                    border-radius: 50%;
+                    box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.5);
+
+                    &:hover {
+                        opacity: 0.8;
+                    }
+
+                    &.active {
+                        opacity: 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
 .card-search-result-container{
     display: flex;
     flex-wrap: wrap;
