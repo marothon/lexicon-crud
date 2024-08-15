@@ -3,9 +3,10 @@ header {
         > .filter-settings{
             > .mana-filter {
                 display: flex;
+                flex-wrap: wrap;
                 padding: 1rem;
                 box-sizing: border-box;
-
+                
                 > .mana {
                     opacity: 0.2;
                     margin: 0.5rem;
@@ -74,6 +75,7 @@ header {
         width: 2rem;
         height: 2rem;   
         cursor: pointer;
+        user-select: none;
         &:hover{
             border-radius: 0.5rem;
             box-shadow: 0px 1px 10px 1px rgba(0, 0, 0, 0.2);

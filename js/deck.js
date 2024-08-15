@@ -1,22 +1,54 @@
 class Deck {
     #loaded;
-    #colorPiles; 
+    #colorPiles;
+    #cardPiles;
 
     constructor(name, cards = [], loaded = false){
         this.name = name;
         this.cards = cards;
         this.#colorPiles = new Map();
+        this.#cardPiles = new Map();
         for(const card of cards){
-            for(const color of card.colorIdentity){
-                let currentPile = this.#colorPiles.get(color);
-                if(!currentPile){
-                    currentPile = [];
+            if(card.colorIdentity){
+                for(const color of card.colorIdentity){
+                    let currentPile = this.#colorPiles.get(color);
+                    if(!currentPile){
+                        currentPile = [];
+                    }
+                    currentPile.push(card);
+                    this.#colorPiles.set(color, currentPile);
                 }
-                currentPile.push(card);
-                this.#colorPiles.set(color, currentPile);
+            } else {
+                let colorlessPile = this.#colorPiles.get('C') ?? [];
+                colorlessPile.push(card);
+                this.#colorPiles.set('C', colorlessPile);
             }
+            this.#increaseCardCount(card);
         }
         this.#loaded = loaded;
+    }
+
+    #increaseCardCount(card){
+        if(this.#cardPiles.has(card.id)){
+            let cardPile = this.#cardPiles.get(card.id);
+            cardPile.count++;
+        } else {
+            this.#cardPiles.set(card.id, {count: 1, card: card});
+        }
+    }
+
+    #decreaseCardCount(card){
+        if(this.#cardPiles.has(card.id)){
+            let cardPile = this.#cardPiles.get(card.id);
+            cardPile.count--;
+            if(cardPile.count == 0){
+                this.#cardPiles.delete(card.id);
+            }
+        }
+    }
+
+    getCards(){
+        return this.#cardPiles.entries();
     }
 
     getColorCount(){
@@ -29,10 +61,15 @@ class Deck {
 
     addCard(){
         this.cards.push(...arguments);
+        for(let card of arguments){
+            this.#increaseCardCount(card);
+        }
     }
 
     removeCard(card){
-        this.cards = this.cards.filter(deckCard => deckCard.id !== card.id);
+        let index = this.cards.map((card) => card.id).indexOf(card.id);
+        this.cards.splice(index, 1);
+        this.#decreaseCardCount(card);
     }
 
     rename(newName){
