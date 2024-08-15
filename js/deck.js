@@ -1,14 +1,57 @@
 class Deck {
     #loaded;
+    #colorPiles; 
 
-    constructor(name, cards = null, loaded = false){
+    constructor(name, cards = [], loaded = false){
         this.name = name;
         this.cards = cards;
+        this.#colorPiles = new Map();
+        for(const card of cards){
+            for(const color of card.colorIdentity){
+                let currentPile = this.#colorPiles.get(color);
+                if(!currentPile){
+                    currentPile = [];
+                }
+                currentPile.push(card);
+                this.#colorPiles.set(color, currentPile);
+            }
+        }
         this.#loaded = loaded;
     }
 
+    getColorCount(){
+        let colorCount = {};
+        for(const [color, cardPile] of this.#colorPiles){
+            colorCount[color] = cardPile.length;
+        }
+        return colorCount;
+    }
+
+    addCard(){
+        this.cards.push(...arguments);
+    }
+
+    removeCard(card){
+        this.cards = this.cards.filter(deckCard => deckCard.id !== card.id);
+    }
+
+    rename(newName){
+        let decks = Deck.all()
+        let deck = decks.find((deck) => deck.name == this.name);
+        this.name = newName;
+        if(this.#loaded){
+            localStorage.setItem('decks',   JSON.stringify(decks));
+        }
+    }
+
+    remove(){
+        let decks = Deck.all()
+        decks = decks.filter((deck) => deck.name !== this.name);
+        localStorage.setItem('decks',   JSON.stringify(decks));
+    }
+
     save(override=false){
-        let decks = JSON.parse(localStorage.getItem('decks')) ?? [];
+        let decks = Deck.all()
         let deck = decks.find((deck) => deck.name == this.name);
 
         if(deck){
@@ -25,10 +68,10 @@ class Deck {
     }
 
     static load(name){
-        let decks = JSON.parse(localStorage.getItem('decks')) ?? [];
+        let decks = Deck.all()
         let deck = decks.find((deck) => deck.name == name);
         if(deck){
-            return new Deck(deck.name, deck.cards, true);
+            return deck;
         } else {
             throw new DeckCannotBeLoadedError(`No deck with name ${name} could be found!`);
         }

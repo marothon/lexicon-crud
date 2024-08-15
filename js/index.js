@@ -2,9 +2,16 @@ setup();
 
 function setup(){
     document.addEventListener('DOMContentLoaded', async () => {
+        let urlParams = new URLSearchParams(window.location.search);
         let cards = await Card.all();
         renderCards(cards);
 
+        if(urlParams.has('deck')){
+            let deck = Deck.load(urlParams.get('deck'));
+            updateCurrentDeck(deck);
+            renderDeck(deck);
+        }
+        
         document.querySelector('.toggle-filter-settings').addEventListener('click', () => {
             document.querySelector('.filter-settings').classList.toggle('hidden');
         });
@@ -26,15 +33,22 @@ function setup(){
             let cards = await Card.find(searchInput.value, '', colors);
             renderCards(cards);
         });
+
     });
 }
 
 function renderCard(card){
-    return `
-        <article class="card">
-            <img src="${card.imageUrl}">
-        </article>
-    `;
+    let cardTag = document.createElement('article');
+    cardTag.classList.add('card');
+    cardTag.innerHTML = `<img src="${card.imageUrl}">`;
+    cardTag.addEventListener('click', (event) => {
+        let deck = currentDeck();
+        deck.addCard(card);
+        deck.save();
+        updateCurrentDeck(deck);
+        renderDeck(deck);
+    });
+    return cardTag;
 }
 
 function renderCards(cards){
@@ -42,6 +56,27 @@ function renderCards(cards){
     cardSearchContainer.innerHTML = '';
     for(card of cards){
         let cardTag = renderCard(card);
-        cardSearchContainer.insertAdjacentHTML('beforeend', cardTag);
+        cardSearchContainer.insertAdjacentElement('beforeend', cardTag);
     }
+}
+
+function currentDeck(){
+    let deck = JSON.parse(localStorage.getItem('currentDeck'));
+    return new Deck(deck.name, deck.cards, true);
+}
+
+function updateCurrentDeck(deck){
+    localStorage.setItem('currentDeck', JSON.stringify(deck));
+}
+
+function renderDeck(deck){
+    let deckContainerTag = document.querySelector('.edit-deck-container');
+    deckContainerTag.innerHTML = '';
+    let deckTag = `
+        <article class="deck">
+            <h2>${deck.name}</h2>
+            <p class="card-count">${deck.cards.length} cards</p>
+        </article>
+        `;
+    deckContainerTag.insertAdjacentHTML('afterbegin', deckTag);
 }

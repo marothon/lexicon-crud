@@ -4,8 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deckbuilder - My decks</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/decks.css">
+    <script src="js/deck.js"></script>
+    <script src="js/decks.js"></script>
 </head>
 <body>
-    
+    <header>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="decks.html">Decks</a>
+        </nav>
+        <form class="new-deck-form">
+            <input type="text" id="card-name" placeholder="Enter name">
+            <input type="submit" value="Create">
+        </form>
+    </header>
+    <main>
+        <div class="deck-list-container"></div>
+    </main>
 </body>
 </html>
