@@ -5,7 +5,7 @@ class Deck {
 
     constructor(name, cards = [], loaded = false){
         this.name = name;
-        this.cards = cards;
+        this.cards = cards.map((card) => new Card(card));
         this.#colorPiles = new Map();
         this.#cardPiles = new Map();
         for(const card of this.cards){

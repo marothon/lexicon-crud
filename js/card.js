@@ -1,6 +1,15 @@
 class Card {
     static #baseUrl = 'https://api.magicthegathering.io/v1';
 
+    constructor(data){
+        this.id = data.id;
+        this.name = data.name
+        this.imageUrl = data.imageUrl;
+        this.manaCost = data.manaCost;
+        this.colorIdentity = data.colorIdentity;
+        this.type = data.type;
+    }
+
     static async all(){
         return Card.find();
     }
@@ -103,7 +112,7 @@ class CardSearch {
 
         CardSearch.#initCache();
         if(!CardSearch.#cache.has(key)){
-            CardSearch.#cache.set(key, {cards: cards});
+            CardSearch.#cache.set(key, {cards: cards.map(cardData => new Card(cardData))});
             localStorage.setItem('cardSearchCache', JSON.stringify(Array.from(CardSearch.#cache.entries())));
             console.log('set cache');
         }
