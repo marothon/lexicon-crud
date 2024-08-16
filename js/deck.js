@@ -9,23 +9,53 @@ class Deck {
         this.#colorPiles = new Map();
         this.#cardPiles = new Map();
         for(const card of this.cards){
-            if(card.colorIdentity){
-                for(const color of card.colorIdentity){
-                    let currentPile = this.#colorPiles.get(color);
-                    if(!currentPile){
-                        currentPile = [];
-                    }
-                    currentPile.push(card);
-                    this.#colorPiles.set(color, currentPile);
-                }
-            } else {
-                let colorlessPile = this.#colorPiles.get('C') ?? [];
-                colorlessPile.push(card);
-                this.#colorPiles.set('C', colorlessPile);
-            }
+            this.#increaseColorCount(card);
             this.#increaseCardCount(card);
         }
         this.#loaded = loaded;
+    }
+
+    #increaseColorCount(card){
+        if(card.colorIdentity){
+            for(const color of card.colorIdentity){
+                let currentPile = this.#colorPiles.get(color);
+                if(!currentPile){
+                    currentPile = [];
+                }
+                currentPile.push(card);
+                this.#colorPiles.set(color, currentPile);
+            }
+        } else {
+            let colorlessPile = this.#colorPiles.get('C') ?? [];
+            colorlessPile.push(card);
+            this.#colorPiles.set('C', colorlessPile);
+        }
+    }
+
+    #decreaseColorCount(card){
+        if(card.colorIdentity){
+            for(const color of card.colorIdentity){
+                let currentPile = this.#colorPiles.get(color);
+                let index = currentPile.map((card) => card.id).indexOf(card.id);
+                currentPile.splice(index, 1);
+                if(currentPile.length == 0){
+                    this.#colorPiles.delete(color);
+                } else {
+                    this.#colorPiles.set(color, currentPile);
+                }
+            }
+        } else {
+            let colorlessPile = this.#colorPiles.get('C');
+            if(colorlessPile){
+                let index = colorlessPile.map((card) => card.id).indexOf(card.id);
+                colorlessPile.splice(index, 1);
+                if(colorlessPile.length == 0){
+                    this.#colorPiles.delete('C');
+                } else {
+                    this.#colorPiles.set('C', colorlessPile);
+                }
+            }
+        }
     }
 
     #increaseCardCount(card){
@@ -63,6 +93,7 @@ class Deck {
         this.cards.push(...arguments);
         for(let card of arguments){
             this.#increaseCardCount(card);
+            this.#increaseColorCount(card);
         }
     }
 
@@ -70,6 +101,7 @@ class Deck {
         let index = this.cards.map((card) => card.id).indexOf(card.id);
         this.cards.splice(index, 1);
         this.#decreaseCardCount(card);
+        this.#decreaseColorCount(card);
     }
 
     rename(newName){

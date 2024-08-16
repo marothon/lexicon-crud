@@ -3,9 +3,7 @@ setup();
 function setup(){
     document.addEventListener('DOMContentLoaded', async () => {
         let urlParams = new URLSearchParams(window.location.search);
-        let cards = await Card.all();
-        renderCards(cards);
-
+        
         if(urlParams.has('deck')){
             let deck = Deck.load(urlParams.get('deck'));
             updateCurrentDeck(deck);
@@ -17,6 +15,9 @@ function setup(){
                 window.history.pushState({}, null, `index.html?deck=${deck.name}`);
             }
         }
+
+        let cards = await Card.all();
+        renderCards(cards);
         
         document.querySelector('.toggle-filter-settings').addEventListener('click', () => {
             document.querySelector('.filter-settings').classList.toggle('hidden');
@@ -47,13 +48,16 @@ function renderCard(card){
     let cardTag = document.createElement('article');
     cardTag.classList.add('card');
     cardTag.innerHTML = `<img src="${card.imageUrl}">`;
-    cardTag.addEventListener('click', (event) => {
-        let deck = currentDeck();
-        deck.addCard(card);
-        deck.save();
-        updateCurrentDeck(deck);
-        renderCurrentDeck(deck);
-    });
+    if(currentDeck()){
+        cardTag.classList.add('selectable');
+        cardTag.addEventListener('click', (event) => {
+            let deck = currentDeck();
+            deck.addCard(card);
+            deck.save();
+            updateCurrentDeck(deck);
+            renderCurrentDeck(deck);
+        });
+    }
     return cardTag;
 }
 
@@ -69,7 +73,7 @@ function renderCards(cards){
 function currentDeck(){
     let deck = JSON.parse(localStorage.getItem('currentDeck'));
     if(deck){
-        return new Deck(deck.name, deck.cards, true);
+        return Deck.load(deck.name);
     } else {
         return null;
     }
@@ -81,19 +85,37 @@ function updateCurrentDeck(deck){
 
 function clearCurrentDeck(){
     localStorage.removeItem('currentDeck');
+    document.querySelectorAll('.card').forEach((card) => {
+        card.classList.remove('selectable');
+    })
 }
 
 function renderCurrentDeck(deck){
     let deckContainerTag = document.querySelector('.edit-deck-container');
     deckContainerTag.innerHTML = '';
     let deckTag = DeckRenderer.render(deck, false);
-    deckTag.insertAdjacentHTML('beforeend', '<aside class="close-current-deck">X</aside>');
-    deckContainerTag.insertAdjacentElement('afterbegin', deckTag);
-    deckContainerTag
-        .querySelector('.close-current-deck')
-        .addEventListener('click', (event) => {
-            clearCurrentDeck();
-            event.target.parentElement.remove();
-            window.history.pushState({}, null, 'index.html');
-});
+
+    let attachCloseButton = (deckTag) => {
+        deckTag.insertAdjacentHTML('beforeend', '<aside class="close-current-deck">X</aside>');
+        deckContainerTag.insertAdjacentElement('afterbegin', deckTag);
+        deckContainerTag
+            .querySelector('.close-current-deck')
+            .addEventListener('click', (event) => {
+                clearCurrentDeck();
+                event.target.parentElement.remove();
+                window.history.pushState({}, null, 'index.html');
+        });
+    }
+
+    let updateOnCardChange = (event) => {
+        let deckTag = event.target;
+        let newDeckTag = DeckRenderer.render(deck, false);
+        attachCloseButton(newDeckTag);
+        deckTag.parentElement.replaceChild(newDeckTag, deckTag);
+        newDeckTag.addEventListener('card-change', updateOnCardChange)
+    };
+
+    attachCloseButton(deckTag);
+    
+    deckTag.addEventListener('card-change', updateOnCardChange);
 }

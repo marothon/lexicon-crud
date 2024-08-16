@@ -19,6 +19,14 @@ function renderDecks(decks){
     for(deck of decks){
         let deckTag = DeckRenderer.render(deck);
         deckListContainerTag.insertAdjacentElement('beforeend', deckTag);
+
+        let updateOnCardChange = (event) => {
+            let deckTag = event.target;
+            let newDeckTag = DeckRenderer.render(deck);
+            deckTag.parentElement.replaceChild(newDeckTag, deckTag);
+            newDeckTag.addEventListener('card-change', updateOnCardChange)
+        };
+        deckTag.addEventListener('card-change', updateOnCardChange);
     }
 }
 

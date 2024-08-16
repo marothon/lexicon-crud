@@ -61,8 +61,8 @@ class DeckRenderer {
         return deckElem;
     }
     
-    //A card part of the deck as a "row"
-    static renderDeckCard(cardCount, deck, includeEditOptions = true){
+    //A card part of the deck as a "row"    
+    static renderDeckCard(cardCount, deck){
         let deckCardTag = document.createElement('div');
         let card = cardCount[1].card;;
         deckCardTag.classList.add('deck-card');
@@ -79,14 +79,16 @@ class DeckRenderer {
     
         deckCardTag.querySelector('.card-add').addEventListener('click', (event) => {
             deck.addCard(card);
+            deck.save();
             let deckTag = document.querySelector(`.deck[id="${deck.name}"]`);
-            deckTag.parentElement.replaceChild(DeckRenderer.render(deck, includeEditOptions), deckTag);
+            deckTag.dispatchEvent(new Event('card-change'));
         });
         
         deckCardTag.querySelector('.card-remove').addEventListener('click', (event) => {
             deck.removeCard(card);
+            deck.save();
             let deckTag = document.querySelector(`.deck[id="${deck.name}"]`);
-            deckTag.parentElement.replaceChild(DeckRenderer.render(deck, includeEditOptions), deckTag);
+            deckTag.dispatchEvent(new Event('card-change'));
         });
     
         return deckCardTag;
