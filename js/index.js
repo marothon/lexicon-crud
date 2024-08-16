@@ -29,15 +29,18 @@ function setup(){
             });
         });
 
-        let cardSearchContainer = document.querySelector('.card-search-result-container');
         let searchForm = document.querySelector('.card-search-form');
         searchForm.addEventListener('submit', async (event) => {
             event.preventDefault();
+            event.target.setAttribute('inert', '');
             let searchInput = event.target.querySelector('& > input[type="text"]');
             let colors = Array.from(document.querySelectorAll('.mana-filter > .mana.active'))
                             .map((manaElem) => manaElem.getAttribute('data-color'))
                             .join(',');
             let cards = await Card.find(searchInput.value, '', colors);
+            let cardSearchContainer = document.querySelector('.card-search-result-container');
+            cardSearchContainer.innerHTML = '';
+            event.target.removeAttribute('inert', '');
             renderCards(cards);
         });
 
