@@ -9,11 +9,11 @@ function setup(){
         if(urlParams.has('deck')){
             let deck = Deck.load(urlParams.get('deck'));
             updateCurrentDeck(deck);
-            renderDeck(deck);
+            renderCurrentDeck(deck);
         }else {
             let deck = currentDeck();
             if(deck){
-                renderDeck(deck);
+                renderCurrentDeck(deck);
                 window.history.pushState({}, null, `index.html?deck=${deck.name}`);
             }
         }
@@ -52,7 +52,7 @@ function renderCard(card){
         deck.addCard(card);
         deck.save();
         updateCurrentDeck(deck);
-        renderDeck(deck);
+        renderCurrentDeck(deck);
     });
     return cardTag;
 }
@@ -83,22 +83,17 @@ function clearCurrentDeck(){
     localStorage.removeItem('currentDeck');
 }
 
-function renderDeck(deck){
+function renderCurrentDeck(deck){
     let deckContainerTag = document.querySelector('.edit-deck-container');
     deckContainerTag.innerHTML = '';
-    let deckTag = `
-        <article class="deck">
-            <aside class="close-current-deck">X</aside>
-            <h2>${deck.name}</h2>
-            <p class="card-count">${deck.cards.length} cards</p>
-        </article>
-        `;
-    deckContainerTag.insertAdjacentHTML('afterbegin', deckTag);
+    let deckTag = DeckRenderer.render(deck, false);
+    deckTag.insertAdjacentHTML('beforeend', '<aside class="close-current-deck">X</aside>');
+    deckContainerTag.insertAdjacentElement('afterbegin', deckTag);
     deckContainerTag
-    .querySelector('.close-current-deck')
-    .addEventListener('click', (event) => {
-        clearCurrentDeck();
-        event.target.parentElement.remove();
-        window.history.pushState({}, null, 'index.html');
+        .querySelector('.close-current-deck')
+        .addEventListener('click', (event) => {
+            clearCurrentDeck();
+            event.target.parentElement.remove();
+            window.history.pushState({}, null, 'index.html');
 });
 }

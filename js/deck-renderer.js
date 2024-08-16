@@ -1,7 +1,7 @@
 class DeckRenderer {
 
     // The entire deck
-    static render(deck){
+    static render(deck, includeEditOptions=true){
         let deckElem = document.createElement('article');
         deckElem.classList.add('deck');
         deckElem.id = deck.name;
@@ -26,7 +26,7 @@ class DeckRenderer {
         let deckCardsContainer = document.createElement('div');
         deckCardsContainer.classList.add('deck-card-list-container');
         for(let cardCount of deck.getCards()){
-            deckCardsContainer.appendChild(DeckRenderer.renderDeckCard(cardCount, deck));
+            deckCardsContainer.appendChild(DeckRenderer.renderDeckCard(cardCount, deck, includeEditOptions));
         }
     
         deckElem.innerHTML = `
@@ -34,30 +34,35 @@ class DeckRenderer {
                     <h3>${deck.name}</h3> ${deckIdentityTag}
                 </div>
                 ${colorCountTag}
-                <button class="edit-deck">Add new cards</button>
-                <button class="delete-deck">Delete</button>
             `;
+    
+        if(includeEditOptions){
+            deckElem.innerHTML += `<button class="edit-deck">Add new cards</button>
+                                    <button class="delete-deck">Delete</button>`;
+        }
     
         deckElem.querySelector('.deck-heading').insertAdjacentElement('afterend', deckCardsContainer)
     
-        deckElem.querySelector('.delete-deck').addEventListener('click', (event) => {
-            let confirmation = confirm('Are you sure?');
-            if(confirmation){
-                deck.remove();
-                localStorage.removeItem('currentDeck');
-                window.location.reload();
-            }
-        });
-    
-        deckElem.querySelector('.edit-deck').addEventListener('click', (event) => {
-            window.location = `index.html?deck=${deck.name}`;
-        });
-    
+        if(includeEditOptions){
+            deckElem.querySelector('.delete-deck').addEventListener('click', (event) => {
+                let confirmation = confirm('Are you sure?');
+                if(confirmation){
+                    deck.remove();
+                    localStorage.removeItem('currentDeck');
+                    window.location.reload();
+                }
+            });
+        
+            deckElem.querySelector('.edit-deck').addEventListener('click', (event) => {
+                window.location = `index.html?deck=${deck.name}`;
+            });
+        }
+
         return deckElem;
     }
     
     //A card part of the deck as a "row"
-    static renderDeckCard(cardCount, deck){
+    static renderDeckCard(cardCount, deck, includeEditOptions = true){
         let deckCardTag = document.createElement('div');
         let card = cardCount[1].card;;
         deckCardTag.classList.add('deck-card');
@@ -75,13 +80,13 @@ class DeckRenderer {
         deckCardTag.querySelector('.card-add').addEventListener('click', (event) => {
             deck.addCard(card);
             let deckTag = document.querySelector(`.deck[id="${deck.name}"]`);
-            deckTag.parentElement.replaceChild(DeckRenderer.render(deck), deckTag);
+            deckTag.parentElement.replaceChild(DeckRenderer.render(deck, includeEditOptions), deckTag);
         });
         
         deckCardTag.querySelector('.card-remove').addEventListener('click', (event) => {
             deck.removeCard(card);
             let deckTag = document.querySelector(`.deck[id="${deck.name}"]`);
-            deckTag.parentElement.replaceChild(DeckRenderer.render(deck), deckTag);
+            deckTag.parentElement.replaceChild(DeckRenderer.render(deck, includeEditOptions), deckTag);
         });
     
         return deckCardTag;
@@ -89,9 +94,9 @@ class DeckRenderer {
     
     //The casting-cost converted to SVG-symbols
     static renderCost(manaCost){
-        return manaCost.replace(/{(.*?)}/g, (a, b) => {
+        return manaCost ? manaCost.replace(/{(.*?)}/g, (a, b) => {
             return DeckRenderer.renderMana(b);
-        })
+        }) : '';
     }
     
     //A single mana cost symbol converted to a SVG-symbol
