@@ -8,7 +8,7 @@ class Deck {
         this.cards = cards;
         this.#colorPiles = new Map();
         this.#cardPiles = new Map();
-        for(const card of cards){
+        for(const card of this.cards){
             if(card.colorIdentity){
                 for(const color of card.colorIdentity){
                     let currentPile = this.#colorPiles.get(color);
@@ -100,7 +100,7 @@ class Deck {
         } else {
             decks.push(this);
         }
-        localStorage.setItem('decks',   JSON.stringify(decks));
+        localStorage.setItem('decks', JSON.stringify(decks));
         this.#loaded = true;
     }
 
