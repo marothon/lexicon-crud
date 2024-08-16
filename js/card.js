@@ -10,11 +10,11 @@ class Card {
         this.type = data.type;
     }
 
-    static async all(){
-        return Card.find();
+    static async random(){
+        return Card.find('', '', '', 'creature', 1, true);
     }
 
-    static async find(name='', text='', colors='', page=1){
+    static async find(name='', text='', colors='', types='', page=1, random=false){
         name = name.toLocaleLowerCase();
         text = text.toLocaleLowerCase();
         if(CardSearch.has(name, text, colors, page)){
@@ -25,6 +25,9 @@ class Card {
             params = name == '' ? params : `${params}&name=${name}`;
             params = text == '' ? params : `${params}&text=${text}`;
             params = colors == '' ? params : `${params}&colors=${colors}`;
+            params = !random ? params : `${params}&random=true`;
+            params = types == '' ? params : `${params}&types=${types}`;
+
             console.log(params);
             let cardsResponse = await fetch(`${this.#baseUrl}/cards${params}`);
             let cards = await cardsResponse.json();

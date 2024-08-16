@@ -16,7 +16,7 @@ function setup(){
             }
         }
 
-        let cards = await Card.all();
+        let cards = await Card.random();
         renderCards(cards);
         
         document.querySelector('.toggle-filter-settings').addEventListener('click', () => {
