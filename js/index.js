@@ -8,7 +8,7 @@ function setup(){
             let deck = Deck.load(urlParams.get('deck'));
             updateCurrentDeck(deck);
             renderCurrentDeck(deck);
-        }else {
+        } else {
             let deck = currentDeck();
             if(deck){
                 renderCurrentDeck(deck);
@@ -16,7 +16,12 @@ function setup(){
             }
         }
 
-        let cards = await Card.random();
+        let cards;
+        if(restoreSearchParams()){
+            cards = await performSearch(document.querySelector('.card-search-form'))
+        } else {
+            cards = await Card.random();
+        };
         renderCards(cards);
         
         document.querySelector('.toggle-filter-settings').addEventListener('click', () => {
@@ -30,21 +35,74 @@ function setup(){
         });
 
         let searchForm = document.querySelector('.card-search-form');
-        searchForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            event.target.setAttribute('inert', '');
-            let searchInput = event.target.querySelector('& > input[type="text"]');
-            let colors = Array.from(document.querySelectorAll('.mana-filter > .mana.active'))
-                            .map((manaElem) => manaElem.getAttribute('data-color'))
-                            .join(',');
-            let cards = await Card.find(searchInput.value, '', colors);
-            let cardSearchContainer = document.querySelector('.card-search-result-container');
-            cardSearchContainer.innerHTML = '';
-            event.target.removeAttribute('inert', '');
-            renderCards(cards);
-        });
-
+        searchForm.addEventListener('submit', performSearchHandler);
     });
+}
+
+async function performSearchHandler(event){
+    event.preventDefault();
+    let cards = await performSearch(event.target);
+    renderCards(cards);
+    storeSearchParams();
+}
+
+async function performSearch(form){
+    let searchInput = form.querySelector('& > input[type="text"]');
+    let colors = getManaFilter();
+    let cards = await Card.find(searchInput.value, '', colors);
+    let cardSearchContainer = document.querySelector('.card-search-result-container');
+    cardSearchContainer.innerHTML = '';
+    form.removeAttribute('inert', '');
+    return cards;
+}
+
+function getManaFilter(){
+    return Array.from(document.querySelectorAll('.mana-filter > .mana.active'))
+                    .map((manaElem) => manaElem.getAttribute('data-color'))
+                    .join(',');
+}
+
+function storeSearchParams(){
+    const searchForm = document.querySelector('.card-search-form');
+    const formData = new FormData(searchForm);
+    let searchParams = {};
+    let manaFilter = getManaFilter();
+    if(manaFilter.length > 0){
+        searchParams.manaFilter = manaFilter;
+    }
+    for(let [key, value] of formData){
+        searchParams[key] = value;
+    }
+    localStorage.setItem('previousSearchParams', JSON.stringify(searchParams));
+}
+
+function restoreSearchParams(){
+    const searchForm = document.querySelector('.card-search-form');
+    if(!localStorage.getItem('previousSearchParams')){
+        return false;
+    }
+    const searchParams = JSON.parse(localStorage.getItem('previousSearchParams'));
+
+    let showFilterSettings = false;
+    if(searchParams.manaFilter){
+        showFilterSettings = true;
+        for(let color of searchParams.manaFilter.split(',')){
+            searchForm.querySelector(`.mana-filter .mana[data-color="${color}"]`).classList.add('active');
+        }
+
+        delete searchParams.manaFilter;
+    }
+
+    if(showFilterSettings){
+        searchForm.querySelector('.filter-settings').classList.remove('hidden');
+    }
+
+    for(let key in searchParams){
+        let value = searchParams[key];
+        searchForm.querySelector(`*[name="${key}"]`).setAttribute('value', value);
+    }
+    return true;
+
 }
 
 function renderCard(card){
